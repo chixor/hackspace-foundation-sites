@@ -12,13 +12,28 @@ if (!$user->isMember()) {
 <h2>Member Retention</h2>
 <?
 $length = 3;
-$month = 3;
-$year = 2014;
-$pastMonth = 12;
-$pastYear = 2013;
+
+// get last quarter
+$month = floor(date('n')/3)*3;
+$year = date('Y');
+if($month == 0) {
+	$month = 12;
+	$year--;
+}
+
+// get previous quarter
+$pastMonth = $month-$length;
+$pastYear = $year;
+if($pastMonth == 0) {
+	$pastMonth = 12;
+	$pastYear--;
+}
+
 $graph = Array();
 
-for($x=0;$x<13;$x++) {
+// iterate for enough quarters to show back to q1 2011
+$gofor = (((int)date('Y')-2011)*4) + floor(date('n')/3);
+for($x=0;$x<$gofor;$x++) {
 	$period_start = $year.'-'.str_pad($month-($length-1), 2, '0', STR_PAD_LEFT);
 	$period_end = $year.'-'.str_pad($month, 2, '0', STR_PAD_LEFT);
 	$prev_start = $pastYear.'-'.str_pad($pastMonth-($length-1), 2, '0', STR_PAD_LEFT);
@@ -139,7 +154,7 @@ foreach($graph as $period) {
       google.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
-          ['Period', 'Retention %', 'Acquisition %', 'Return %', 'Attrition/Churn %'],
+          ['Period', 'Retention', 'Acquisition', 'Return', 'Attrition/Churn'],
 <?
 $greverse = array_reverse($graph);
 foreach($greverse as $period) {
@@ -147,9 +162,12 @@ foreach($greverse as $period) {
 	foreach($period as $td) {
 		if(is_int($td)) {}
 		else if(is_float($td))
-			echo number_format((float)$td, 2, '.', '').',';
-		else
-			echo "'".substr($td,2,5)."',";
+			echo number_format((float)$td/100, 2, '.', '').',';
+		else {
+			$y = (int)substr($td,0,4);
+			$m = (int)substr($td,5,2);
+			echo "new Date($y,$m,0,0,0),";
+		}
 	}
 	echo "],\n";
 }
@@ -157,7 +175,29 @@ foreach($greverse as $period) {
         ]);
 
         var options = {
-          colors:['#3366CC','#109618', '#FF9900', '#DC3912']
+          colors:['#3366CC','#109618', '#FF9900', '#DC3912'],
+          vAxis: { minValue: 0, maxValue: 1, format:'#%' },
+          hAxis: { 
+          	format: "MM/yy", 
+          	gridlines: {color: 'white'},
+          	ticks: [
+<?
+foreach($greverse as $period) {
+	$y = (int)substr($period['period'],0,4);
+	$m = (int)substr($period['period'],5,2);
+	echo "\tnew Date($y,$m,0,0,0),\n";
+}
+?>
+          	]
+      	  },
+      	  /*
+          trendlines:{ 
+          	0: { labelInLegend: 'Trend line', visibleInLegend: true },
+          	1: { labelInLegend: 'Trend line', visibleInLegend: true },
+          	2: { labelInLegend: 'Trend line', visibleInLegend: true },
+          	3: { labelInLegend: 'Trend line', visibleInLegend: true },
+          }
+          */
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
