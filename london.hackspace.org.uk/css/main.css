@@ -92,6 +92,15 @@ nav a, a.btn, .dropdown-menu a {
 	text-decoration: none;
 }
 
+pre {
+	border: 0px;
+	background-color: transparent;
+	padding-left: 30px;
+	font-weight: bold;
+	padding-top: 0px;
+	font-size: 1em;
+}
+
 .page-container {
 	position: relative;
 }
@@ -787,4 +796,11 @@ span.member-social-icon {
 
 .tt-suggestion p {
   margin: 0;
+}
+
+.calc-numbers td {
+	text-align:right;
+}
+.calc-numbers {
+	margin:auto;
 }
